@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!--<title>Path: {{ tree.name }}</title>-->
+  <title>File Handling</title>
+  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/my.css') }}"></strong>
+  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}"></strong>
+  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}"></strong>
+  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css')}}"></strong>
+  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css')}}"></strong>
+</head>
+
+<body>
+  <h1>{{ tree.name }}</h1>
+
+  <div class="accordion-heading" >
+      <div class="accordion-toggle" >
+           <div>
+                <ul>
+                  {%- for item in tree.children recursive %}
+                  <div>
+                    <li><a data-toggle="collapse"  data-target="files_list" href="/files/{{ item.name }}">{{ item.name }}</a></li>
+                  </div>
+                  {%- if item.children -%}
+                  <ul>{{ loop(item.children) }}</ul>
+                  {%- endif %}
+                  {%- endfor %}
+                </ul>
+          </div>
+      </div>
+  </div>
+  <div>
+    <a href="/"><h3>Halaman Utama</h3></a>
+    <a href="/"><h3>Upload</h3></a>
+  </div>
+</body>

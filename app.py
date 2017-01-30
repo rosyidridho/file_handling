@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory
 from werkzeug import secure_filename
 
 app = Flask(__name__)
@@ -30,5 +30,28 @@ def upload_handling():
     except Exception as e:
         return {'error': str(e)}
 
+@app.route('/files', methods = ['GET'])
+def config():
+    path = os.path.expanduser(u'uploads/')
+    return render_template('files.html', tree=make_tree(path))
+
+def make_tree(path):
+    tree = dict(name=os.path.basename(path), children=[])
+    try: lst = os.listdir(path)
+    except OSError:
+        pass #ignore errors
+    else:
+        for name in lst:
+            fn = os.path.join(path, name)
+            if os.path.isdir(fn):
+                tree['children'].append(make_tree(fn))
+            else:
+                tree['children'].append(dict(name=name))
+    return tree
+
+@app.route('/files/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8080)
