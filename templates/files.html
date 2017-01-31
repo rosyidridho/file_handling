@@ -2,16 +2,12 @@
 <html lang="en">
 
 <head>
-  <!--<title>Path: {{ tree.name }}</title>-->
-  <title>File Handling</title>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/my.css') }}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css')}}"></strong>
+  {% include "head.html" %}
 </head>
 
 <body>
+  <!-- Navigation -->
+  {% include "navigation.html"%}
   <h1>{{ tree.name }}</h1>
 
   <div class="accordion-heading" >
@@ -34,4 +30,9 @@
     <a href="/"><h3>Halaman Utama</h3></a>
     <a href="/"><h3>Upload</h3></a>
   </div>
+
+  <footer class="text-center">
+      {% include "footer.html" %}
+  </footer>
+
 </body>

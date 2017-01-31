@@ -2,17 +2,13 @@
 <html lang="en">
 
 <head>
-  <title>File Handling</title>
-  <title>File Handling</title>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/my.css') }}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css')}}"></strong>
-
+  {% include "head.html" %}
 </head>
 
 <body>
+  <!-- Navigation -->
+  {% include "navigation.html"%}
+  
   <h1>Upload</h1>
   </br>
   <div class="container">
@@ -31,5 +27,10 @@
       <a href="/files"><h3>List File</h3></a>
     </div>
   </div>
+
+  <footer class="text-center">
+      {% include "footer.html" %}
+  </footer>
+
 </body>
 </html>

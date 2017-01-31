@@ -2,18 +2,53 @@
 <html lang="en">
 
 <head>
-  <title>File Handling</title>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/my.css') }}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css')}}"></strong>
-  <strong><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css')}}"></strong>
+  {% include "head.html" %}
 </head>
 
 <body>
-  <h1>File Handling</h>
-  </br></br>
-  <a href="/upload"><h3>Upload</h3></a>
-  <a href="/files"><h3>List File</h3></a>
+  <!-- Navigation -->
+  {% include "navigation.html"%}
+
+  <!-- Header -->
+  <a name="about"></a>
+  <div class="intro-header">
+      <div class="container">
+
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="intro-message">
+                      <h1>Files Handling</h1>
+                      <h3>A System for Handling Files</h3>
+                      <hr class="intro-divider">
+                      <ul class="list-inline intro-social-buttons">
+                          <li>
+                              <a href="/upload" class="btn btn-default btn-lg"><i class="fa fa-upload fa-fw"></i> <span class="network-name">Upload</span></a>
+                          </li>
+                          <li>
+                              <a href="/files" class="btn btn-default btn-lg"><i class="fa fa-list fa-fw"></i> <span class="network-name">List Files</span></a>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+
+      </div>
+      <!-- /.container -->
+
+  </div>
+  <!-- /.intro-header -->
+
+  <!-- Footer -->
+  <footer class="text-center">
+      {% include "footer.html" %}
+  </footer>
+
+  <!-- jQuery -->
+  <script src="static/js/jquery.js"></script>
+
+  <!-- Bootstrap Core JavaScript -->
+  <script src="static/js/bootstrap.min.js"></script>
+
+
 </body>
 </html>
