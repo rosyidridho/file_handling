@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, send_from_directory
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 from werkzeug import secure_filename
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ def upload_handling():
         if file and not allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect('/files', 301)
+            return redirect(url_for('list_files'))
         else:
             return ('Ekstensi file tidak diperbolehkan')
     except Exception as e:
@@ -36,7 +36,7 @@ def delete_handling(filename):
         #file = request.files['file']
         #filename = secure_filename(file.filename)
         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect('/files', 301)
+        return redirect(url_for('list_files'))
     except Exception as e:
         return {'error': str(e)}
 
