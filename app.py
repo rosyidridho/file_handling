@@ -24,14 +24,25 @@ def upload_handling():
         if file and not allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return ('Upload Berhasil')
+            return redirect('/files')
         else:
             return ('Ekstensi file tidak diperbolehkan')
     except Exception as e:
         return {'error': str(e)}
 
+@app.route('/files/delete_item/<filename>', methods=['GET', 'POST'])
+def delete_handling(filename):
+    try:
+        #file = request.files['file']
+        #filename = secure_filename(file.filename)
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect('/files')
+    except Exception as e:
+        return {'error': str(e)}
+
+
 @app.route('/files', methods = ['GET'])
-def config():
+def list_files():
     path = os.path.expanduser(u'uploads/')
     return render_template('files.html', tree=make_tree(path))
 
@@ -49,7 +60,7 @@ def make_tree(path):
                 tree['children'].append(dict(name=name))
     return tree
 
-@app.route('/files/<filename>')
+@app.route('/files/view/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
