@@ -24,7 +24,7 @@ def upload_handling():
         if file and not allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('list_files'))
+            return redirect('/files', 301)
         else:
             return ('Ekstensi file tidak diperbolehkan')
     except Exception as e:
@@ -36,7 +36,7 @@ def delete_handling(filename):
         #file = request.files['file']
         #filename = secure_filename(file.filename)
         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect('/files')
+        return redirect('/files', 301)
     except Exception as e:
         return {'error': str(e)}
 
