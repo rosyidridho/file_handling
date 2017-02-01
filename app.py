@@ -24,7 +24,7 @@ def upload_handling():
         if file and not allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('list_files'))
+            return ('Upload Berhasil')#redirect(url_for('list_files'))
         else:
             return ('Ekstensi file tidak diperbolehkan')
     except Exception as e:
