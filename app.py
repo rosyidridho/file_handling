@@ -1,49 +1,85 @@
 import os
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, session
 from werkzeug import secure_filename
+'''from flask.ext.mysql import MySql
+mysql = MySql()'''
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['ALLOWED_EXTENSIONS'] = set(['html', 'py'])
+app.secret_key = os.urandom(24)
+
+#MySql configurations
+'''app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = '20022013'
+app.config['MYSQL_DATABASE_DB'] = 'db_file_handling'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'''
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.',1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    if request.method == 'POST':
+        session.pop('user', None)
+
+        if request.form['password'] == '20022013':
+            session['user'] = request.form['username']
+            return redirect(url_for('home'))
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
+@app.route('/logout')
+def loguot():
+    session.pop('user', None)
+    return redirect(url_for('index'))
+
+@app.route('/home')
+def home():
+    if 'user' in session:
+        return render_template('home.html')
+    return redirect(url_for('index'))
 
 @app.route('/upload')
 def upload():
-    return render_template('upload.html')
+    if 'user' in session:
+        return render_template('upload.html')
+    return redirect(url_for('index'))
 
 @app.route('/upload_handling', methods = ['POST'])
 def upload_handling():
-    try:
-        file = request.files['file']
-        if file and not allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('list_files'))
-        else:
-            return ('Ekstensi file tidak diperbolehkan')
-    except Exception as e:
-        return {'error': str(e)}
+    if 'user' in session:
+        try:
+            file = request.files['file']
+            if file and not allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                return redirect(url_for('list_files'))
+            else:
+                return ('Ekstensi file tidak diperbolehkan')
+        except Exception as e:
+            return {'error': str(e)}
+    return redirect(url_for('index'))
 
 @app.route('/files/delete_item/<filename>', methods=['GET', 'POST'])
 def delete_handling(filename):
-    try:
-
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('list_files')) #('Deleted')
-    except Exception as e:
-        return {'error': str(e)}
-
+    if 'user' in session:
+        try:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('list_files')) #('Deleted')
+        except Exception as e:
+            return {'error': str(e)}
+    return redirect(url_for('index'))
 
 @app.route('/files', methods = ['GET'])
 def list_files():
-    path = os.path.expanduser(u'uploads/')
-    return render_template('files.html', tree=make_tree(path))
+    if 'user' in session:
+        path = os.path.expanduser(u'uploads/')
+        return render_template('files.html', tree=make_tree(path))
+    return redirect(url_for('index'))
 
 def make_tree(path):
     tree = dict(name=os.path.basename(path), children=[])
@@ -61,7 +97,9 @@ def make_tree(path):
 
 @app.route('/files/view/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    if 'user' in session:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+    app.run(debug=True, host='0.0.0.0', port=8080)
