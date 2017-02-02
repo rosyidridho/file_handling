@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for, session
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, session, g
 from werkzeug import secure_filename
 '''from flask.ext.mysql import MySql
 mysql = MySql()'''
@@ -28,6 +28,12 @@ def index():
             return redirect(url_for('home'))
     return render_template('login.html')
 
+@app.before_request
+def before_request():
+    g.user = None
+    if 'user' in session:
+        g.user = session['user']
+
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
@@ -39,19 +45,19 @@ def loguot():
 
 @app.route('/home')
 def home():
-    if 'user' in session:
+    if g.user:
         return render_template('home.html')
     return redirect(url_for('index'))
 
 @app.route('/upload')
 def upload():
-    if 'user' in session:
+    if g.user:
         return render_template('upload.html')
     return redirect(url_for('index'))
 
 @app.route('/upload_handling', methods = ['POST'])
 def upload_handling():
-    if 'user' in session:
+    if g.user:
         try:
             file = request.files['file']
             if file and not allowed_file(file.filename):
@@ -66,7 +72,7 @@ def upload_handling():
 
 @app.route('/files/delete_item/<filename>', methods=['GET', 'POST'])
 def delete_handling(filename):
-    if 'user' in session:
+    if g.user:
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('list_files')) #('Deleted')
@@ -76,7 +82,7 @@ def delete_handling(filename):
 
 @app.route('/files', methods = ['GET'])
 def list_files():
-    if 'user' in session:
+    if g.user:
         path = os.path.expanduser(u'uploads/')
         return render_template('files.html', tree=make_tree(path))
     return redirect(url_for('index'))
@@ -97,7 +103,7 @@ def make_tree(path):
 
 @app.route('/files/view/<filename>')
 def uploaded_file(filename):
-    if 'user' in session:
+    if g.user:
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return redirect(url_for('index'))
 
