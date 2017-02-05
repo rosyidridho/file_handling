@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for, session, g
 from werkzeug import secure_filename
+from functools import wraps
 '''from flask.ext.mysql import MySql
 mysql = MySql()'''
 
@@ -18,6 +19,20 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'''
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.',1)[1] in app.config['ALLOWED_EXTENSIONS']
 
+def read_session(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        session.permanent = True
+        try:
+            if session['user'] is False:
+                flash('Username or Password is Invalid')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        except KeyError:
+            flash('Your session is time out, login first')
+            return redirect(url_for('index'))
+    return wrap
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -27,12 +42,6 @@ def index():
             session['user'] = request.form['username']
             return redirect(url_for('home'))
     return render_template('login.html')
-
-@app.before_request
-def before_request():
-    g.user = None
-    if 'user' in session:
-        g.user = session['user']
 
 @app.route('/signup')
 def signup():
@@ -44,48 +53,45 @@ def loguot():
     return redirect(url_for('index'))
 
 @app.route('/home')
+@read_session
 def home():
-    if g.user:
-        return render_template('home.html')
-    return redirect(url_for('index'))
+    return render_template('home.html')
 
 @app.route('/upload')
+@read_session
 def upload():
-    if g.user:
-        return render_template('upload.html')
-    return redirect(url_for('index'))
+    return render_template('upload.html')
 
 @app.route('/upload_handling', methods = ['POST'])
+@read_session
 def upload_handling():
-    if g.user:
-        try:
-            file = request.files['file']
-            if file and not allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                return redirect(url_for('list_files'))
-            else:
-                return ('Ekstensi file tidak diperbolehkan')
-        except Exception as e:
-            return {'error': str(e)}
-    return redirect(url_for('index'))
+    try:
+        file = request.files['file']
+        if file and not allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('list_files'))
+        else:
+            return ('Ekstensi file tidak diperbolehkan')
+    except Exception as e:
+        return {'error': str(e)}
 
-@app.route('/files/delete_item/<filename>', methods=['GET', 'POST'])
-def delete_handling(filename):
-    if g.user:
+@app.route('/files/delete_item', methods = ['GET', 'POST'])
+@read_session
+def delete_handling():
+    if request.method == 'POST':
+        filename = request.form['filename']
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('list_files')) #('Deleted')
         except Exception as e:
             return {'error': str(e)}
-    return redirect(url_for('index'))
 
 @app.route('/files', methods = ['GET'])
+@read_session
 def list_files():
-    if g.user:
-        path = os.path.expanduser(u'uploads/')
-        return render_template('files.html', tree=make_tree(path))
-    return redirect(url_for('index'))
+    path = os.path.expanduser(u'uploads/')
+    return render_template('files.html', tree=make_tree(path))
 
 def make_tree(path):
     tree = dict(name=os.path.basename(path), children=[])
@@ -102,10 +108,9 @@ def make_tree(path):
     return tree
 
 @app.route('/files/view/<filename>')
+@read_session
 def uploaded_file(filename):
-    if g.user:
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-    return redirect(url_for('index'))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=5000)
