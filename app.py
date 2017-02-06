@@ -94,6 +94,7 @@ def list_files():
     return render_template('files.html', tree=make_tree(path))
 
 def make_tree(path):
+    i = 0
     tree = dict(name=os.path.basename(path), children=[])
     try: lst = os.listdir(path)
     except OSError:
@@ -104,7 +105,8 @@ def make_tree(path):
             if os.path.isdir(fn):
                 tree['children'].append(make_tree(fn))
             else:
-                tree['children'].append(dict(name=name))
+                i=i+1
+                tree['children'].append(dict(name=name, i=i))
     return tree
 
 @app.route('/files/view/<filename>')
