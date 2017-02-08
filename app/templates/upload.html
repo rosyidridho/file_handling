@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% include "head.html" %}
+  <link href="static/css/upload.css" rel="stylesheet">
+  <script src="static/js/upload.js"></script>
+</head>
+
+<body>
+  <!-- Navigation -->
+  {% include "navigation.html"%}
+
+  <!--Container-->
+  <div class="container" style="padding-top:100px;">
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>Upload a File</strong> <small> ~~~</small></div>
+        <div class="panel-body">
+
+          <!-- Standar Form -->
+          <h4>Select file from your computer</h4>
+          <!--<form action="upload_handling" method="post" enctype="multipart/form-data" id="js-upload-form">-->
+          <form action="upload_handling" method="post" enctype="multipart/form-data">
+            <div class="form-inline">
+              <div class="form-group">
+                <!--<input type="file" name="file" id="js-upload-files" multiple>-->
+                <input type="file" name="file">
+              </div>
+              <button type="submit" class="btn btn-sm btn-default" id="js-upload-submit">Upload files</button>
+            </div>
+          </form>
+
+          <!-- Drop Zone -->
+          <h4>Or drag and drop files below</h4>
+          <div class="upload-drop-zone" id="drop-zone">
+            Maaf, Fitur drag saat ini belum bisa digunakan
+          </div>
+
+
+        </div>
+      </div>
+    </div> <!-- /container -->
+
+    <div class="text-center">
+    <hr class="intro-divider">
+    <ul class="list-inline intro-social-buttons">
+        <li>
+            <a href="/home" class="btn btn-default btn-lg"><i class="fa fa-home fa-fw"></i> <span class="network-name">Home Page</span></a>
+        </li>
+        <li>
+            <a href="/files" class="btn btn-default btn-lg"><i class="fa fa-list fa-fw"></i> <span class="network-name">List Files</span></a>
+        </li>
+    </ul>
+  </div>
+  <!--<div>
+      <form action="upload_handling" method="post" enctype="multipart/form-data">
+        <input class="input" type="file" name="file">
+        <input type="submit" value="Upload">
+      </form>
+    </div>
+    <div>
+    </br>
+      <a href="/"><h3>Depan</h3></a>
+      <a href="/files"><h3>List File</h3></a>
+    </div>-->
+
+
+  <footer class="text-center">
+      {% include "footer.html" %}
+  </footer>
+  <!-- jQuery -->
+  <script src="static/js/jquery.js"></script>
+
+  <!-- Bootstrap Core JavaScript -->
+  <script src="static/js/bootstrap.min.js"></script>
+
+  <script type="text/javascript">
+	+ function($) {
+    'use strict';
+
+    // UPLOAD CLASS DEFINITION
+    // ======================
+
+    var dropZone = document.getElementById('drop-zone');
+    var uploadForm = document.getElementById('js-upload-form');
+
+    var startUpload = function(files) {
+        console.log(files)
+    }
+
+    uploadForm.addEventListener('submit', function(e) {
+        var uploadFiles = document.getElementById('js-upload-files').files;
+        e.preventDefault()
+
+        startUpload(uploadFiles)
+    })
+
+    dropZone.ondrop = function(e) {
+        e.preventDefault();
+        this.className = 'upload-drop-zone';
+
+        startUpload(e.dataTransfer.files)
+    }
+
+    dropZone.ondragover = function() {
+        this.className = 'upload-drop-zone drop';
+        return false;
+    }
+
+    dropZone.ondragleave = function() {
+        this.className = 'upload-drop-zone';
+        return false;
+    }
+
+}(jQuery);
+	</script>
+
+</body>
+</html>
