@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include "admin/head.html" %}
+
+  <!-- DataTables CSS -->
+  <link href="static/vendor/datatables-plugins/dataTables.bootstrap.css" rel="stylesheet">
+
+  <!-- DataTables Responsive CSS -->
+  <link href="static/vendor/datatables-responsive/dataTables.responsive.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <div id="wrapper">
+    {% include "admin/navigation.html" %}
+  </div>
+  <div id="page-wrapper">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1 class="page-header">Tables</h1>
+      </div> <!-- /.col-lg-12 -->
+    </div> <!-- /.row -->
+
+    <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Hover Rows
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Date Reg</th>
+                                            <th align="center">Delete</th>
+                                            <th align="center">Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for akun in akun %}
+                                        <tr>
+                                            <td></td>
+                                            <td>{{akun.first_name}}</td>
+                                            <td>{{akun.last_name}}</td>
+                                            <td>{{akun.username}}</td>
+                                            <td>{{akun.email}}</td>
+                                            <td>{{akun.date_reg}}</td>
+                                            <td><p data-placement="top" data-toggle="tooltip" title="Delete"><button class="btn btn-default btn-xs" data-title="Delete" data-toggle="modal" data-target="#delete{{ akun.username }}"><span class="glyphicon glyphicon-trash"></span></button></p></td>
+                                            <td><p data-placement="top" data-toggle="tooltip" title="Download"><button class="btn btn-default btn-xs" data-title="Edit" data-toggle="modal" data-target="#edit{{akun.username}}" ><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+                                        </tr>
+                                        <div class="modal fade" id="delete{{ akun.username }}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+                                          <div class="modal-dialog">
+                                        <div class="modal-content">
+                                              <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                                            <h4 class="modal-title custom_align" id="Heading">Delete</h4>
+                                          </div>
+                                              <div class="modal-body">
+
+                                           <div class="alert alert-danger text-center"><span class="glyphicon glyphicon-warning-sign"></span>  Are you sure you want to delete {{ akun.username }}?</div>
+
+                                          </div>
+                                            <form action="#" method="POST">
+                                            <div class="modal-footer ">
+                                            <input type="hidden" value={{ akun.username }} name="username">
+                                            <button type="submit" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
+                                          </div>
+                                          </form>
+                                            </div>
+                                        <!-- /.modal-content -->
+                                        </div>
+                                          <!-- /.modal-dialog -->
+                                        </div>
+
+                                        <div class="modal fade" id="edit{{akun.username}}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+                                              <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                  <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                                                <h4 class="modal-title custom_align" id="Heading">Edit Data User '{{akun.username}}'</h4>
+                                              </div>
+                                              <form class="form-horizontal" role="form" action="/users-data" method="POST">
+                                              <div class="modal-body">
+                                                <fieldset>
+                                                <div class="form-group">
+                                                  <label class="control-label" for="firstname">First Name</label>
+                                                  <div>
+                                                    <input id="firstname" name="firstname" type="text" placeholder="First Name" class="form-control" value="{{akun.first_name}}">
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label class="control-label" for="lastname">Last Name</label>
+                                                  <div>
+                                                    <input id="lastname" name="lastname" type="text" placeholder="Last Name" class="form-control" value="{{akun.last_name}}">
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label class="control-label" for="username">Username</label>
+                                                  <div>
+                                                    <input id="username" type="text" placeholder="Username" class="form-control" value="{{akun.username}}" readonly>
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label class="control-label" for="email">Email</label>
+                                                  <div>
+                                                    <input id="email" type="text" placeholder="Email" class="form-control" value="{{akun.email}}" readonly>
+                                                  </div>
+                                                </div>
+                                              </fieldset>
+                                              </div>
+                                              <div class="modal-footer ">
+                                                <div class="form-group">
+                                                  <input name="id_user" type="hidden" value="{{akun.id}}">
+                                                  <button type="submit" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
+                                                  <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
+                                                </div>
+                                              </div>
+                                          </form>
+                                                </div>
+                                            <!-- /.modal-content -->
+                                          </div>
+                                              <!-- /.modal-dialog -->
+                                            </div>
+                                      {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-6 -->
+              </div>
+  <!-- /#wrapper -->
+  </div>
+
+{% include "admin/jquery-js.html" %}
+
+  <!-- DataTables JavaScript -->
+  <script src="static/vendor/datatables/js/jquery.dataTables.min.js"></script>
+  <script src="static/vendor/datatables-plugins/dataTables.bootstrap.min.js"></script>
+  <script src="static/vendor/datatables-responsive/dataTables.responsive.js"></script>
+
+  <!-- Custom Theme JavaScript -->
+  <script src="static/dist/js/sb-admin-2.js"></script>
+
+  <!-- Page-Level Demo Scripts - Tables - Use for reference -->
+  <script>
+  $(document).ready(function() {
+      $('#dataTables-example').DataTable({
+          responsive: true
+      });
+  });
+  </script>
+
+</body>
+</html>
