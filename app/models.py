@@ -43,11 +43,13 @@ class Tb_file(db.Model):
     akun_id = db.Column(db.Integer, db.ForeignKey('tb_akun.id'))
     akun = db.relationship('Tb_akun', backref=db.backref('tb_file', lazy='dynamic'))
     filename = db.Column(db.String(100))
+    size = db.Column(db.String(20))
     date_create = db.Column(db.DateTime)
 
-    def __init__(self, akun_id, filename, date_create):
+    def __init__(self, akun_id, filename, size, date_create):
         self.akun_id = akun_id
         self.filename = filename
+        self.size = size
         if date_create is None:
             date_create = datetime.utcnow()
         self.date_create = date_create

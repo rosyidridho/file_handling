@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import app, db
 from app.models import Tb_akun, Tb_file
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, date
 
 
 def allowed_file(filename):
@@ -90,9 +90,41 @@ def loguot():
 @read_session
 def home():
     if cek_level(session['user_id']) == 2:
-        return render_template('dash-admin.html')
+        tot_ac = tot_acc()
+        tot_fl = tot_file()
+        tot_strg = tot_storage()
+        acc_inactv = tot_acc_inactive()
+        return render_template('dash-admin.html', tot_akun=tot_ac, tot_file=tot_fl, tot_strg=tot_strg, acc_inactv=acc_inactv)
     else:
         return render_template('home.html')
+
+def tot_acc():
+    akun = Tb_akun.query.all()
+    i=0
+    for ak in akun:
+        i=i+1
+    return i
+
+def tot_file():
+    files = Tb_file.query.all()
+    i=0
+    for fl in files:
+        i=i+1
+    return i
+
+def tot_storage():
+    storage = Tb_file.query.all()
+    i=0
+    for strg in storage:
+        i=i+int(strg.size)
+    return convert_size(i)
+
+def tot_acc_inactive():
+    acc_inactive = Tb_akun.query.filter_by(level=0)
+    i=0
+    for ak in acc_inactive:
+        i=i+1
+    return i
 
 @app.route('/upload')
 @read_session
@@ -102,21 +134,27 @@ def upload():
 @app.route('/upload_handling', methods = ['POST'])
 @read_session
 def upload_handling():
-
     try:
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filename = str(session['user_id'])+"-"+filename
+            cek_file = Tb_file.query.filter_by(filename=filename)
+            for nm_file in cek_file:
+                if nm_file.filename == filename:
+                    flash ('Nama File sudah ada')
+                    return redirect(url_for('upload'))
+
             direktori = app.config['UPLOAD_FOLDER']+str(session['user_id'])+"/"
-            #print direktori
             file.save(os.path.join(direktori, filename))
-            ins_file=Tb_file(akun_id=str(session['user_id']), filename=filename, date_create=datetime.utcnow())
+            filesize = os.path.getsize(direktori+filename)
+            print filesize
+            ins_file=Tb_file(akun_id=str(session['user_id']), filename=filename, size=str(filesize), date_create=datetime.utcnow())
             db.session.add(ins_file)
             db.session.commit()
             return redirect(url_for('list_files'))
         else:
-            return ('Ekstensi file tidak diperbolehkan')
+            flash ('Ekstensi file tidak diperbolehkan')
+            return redirect(url_for('upload'))
     except Exception as e:
         return {'error': str(e)}
 
@@ -137,6 +175,12 @@ def delete_handling():
         filename = request.form['filename']
         try:
             os.remove(os.path.join(user_direktori, filename))
+            del_item = Tb_file.query.filter_by(filename=filename)
+
+            for item in del_item:
+                del_file = Tb_file.query.get(item.id)
+                db.session.delete(del_file)
+                db.session.commit()
             return redirect(url_for('list_files')) #('Deleted')
         except Exception as e:
             return {'error': str(e)}
@@ -146,8 +190,12 @@ def delete_handling():
 def list_files():
     user_direktori = str(session['user_id'])
     path = os.path.expanduser(u'app/uploads/'+user_direktori)
-
-    return render_template('files.html', tree=make_tree(path))
+    allfile = Tb_file.query.filter_by(akun_id=session['user_id'])
+    tot_size = 0
+    for item in allfile:
+        tot_size = tot_size + int(item.size)
+    total_size = convert_size(tot_size)
+    return render_template('files.html', tree=make_tree(path), to_size=total_size)
 
 def make_tree(path):
     i=0
@@ -158,7 +206,6 @@ def make_tree(path):
     else:
         for name in lst:
             fn = os.path.join(path, name)
-            tot_size = 0
             if os.path.isdir(fn):
                 tree['children'].append(make_tree(fn))
             else:
@@ -178,7 +225,20 @@ def convert_size(size):
         newsize = str(size)+" Mb"
     return newsize
 
+def owner(kode):
+    cek = Tb_akun.query.filter_by(id=kode)
+    ret = 'None'
+    for c in cek:
+        if kode == c.id:
+            pemilik = Tb_akun.query.get(kode)
+            ret = pemilik.username
+        else:
+            ret = 'None'
+
+    return ret
+
 @app.route('/users-data', methods=['POST', 'GET'])
+@read_session
 @read_level
 def user_data():
     akunAll = Tb_akun.query.all()
@@ -190,16 +250,25 @@ def user_data():
     return render_template('admin/users-data.html', akun=akunAll)
 
 @app.route('/users-files')
+@read_session
+@read_level
 def user_file():
     path = os.path.expanduser(u'app/uploads/')
     return render_template('admin/users-files.html', tree=make_tree(path))
 
 @app.route('/<id>')
+@read_session
+@read_level
 def user_file_id(id):
     path = os.path.expanduser(u'app/uploads/'+id)
-    return render_template('admin/users-files-id.html', tree=make_tree(path), foldername=id)
+    kode = int(id)
+    pemilik = owner(kode)
+
+    return render_template('admin/users-files-id.html', tree=make_tree(path), foldername=id, pemilik=pemilik)
 
 @app.route('/view-admin/<fn>', methods=['POST', 'GET'])
+@read_session
+@read_level
 def view_admin(fn):
     if request.method == 'POST':
         foldername = request.form['foldername']
@@ -208,6 +277,8 @@ def view_admin(fn):
         return send_from_directory(direktori, filename)
 
 @app.route('/delete', methods = ['GET', 'POST'])
+@read_session
+@read_level
 def delete():
     if request.method == 'POST':
         foldername = str(request.form['foldername'])
