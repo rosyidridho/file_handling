@@ -1,1 +1,1 @@
-SQLALCHEMY_DATABASE_URI = 'mysql://root:20022013@localhost/db_file_handling'
+SQLALCHEMY_DATABASE_URI = 'mysql://sql3161086:qdPbTKV4Sa@sql3.freemysqlhosting.net/db_file_handling'
