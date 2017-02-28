@@ -74,8 +74,8 @@ def signup():
             cek_akun = Tb_akun.query.filter_by(username=request.form['username']).first()
             foldername = str(cek_akun.id)
             os.mkdir('app/uploads/'+foldername)
-            os.system("git add .")
-            os.system("git commit -am \"new folder of user\"")
+            '''os.system("git add .")
+            os.system("git commit -am \"new folder of user\"")'''
             flash('New account was successfully created')
             return redirect(url_for('index'))
         else:
