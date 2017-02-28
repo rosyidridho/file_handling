@@ -74,8 +74,9 @@ def signup():
             cek_akun = Tb_akun.query.filter_by(username=request.form['username']).first()
             foldername = str(cek_akun.id)
             os.mkdir('app/uploads/'+foldername)
-            '''os.system("git add .")
-            os.system("git commit -am \"new folder of user\"")'''
+            #to commit folder in heroku
+            os.system("git add .")
+            os.system("git commit -am \"new folder of user\"")
             flash('New account was successfully created')
             return redirect(url_for('index'))
         else:
@@ -149,10 +150,12 @@ def upload_handling():
             direktori = app.config['UPLOAD_FOLDER']+str(session['user_id'])+"/"
             file.save(os.path.join(direktori, filename))
             filesize = os.path.getsize(direktori+filename)
-            print filesize
             ins_file=Tb_file(akun_id=str(session['user_id']), filename=filename, size=str(filesize), date_create=datetime.utcnow())
             db.session.add(ins_file)
             db.session.commit()
+            #to commit file in heroku
+            os.system("git add .")
+            os.system("git commit -am \"new file of user\"")
             return redirect(url_for('list_files'))
         else:
             flash ('Ekstensi file tidak diperbolehkan')
@@ -183,6 +186,9 @@ def delete_handling():
                 del_file = Tb_file.query.get(item.id)
                 db.session.delete(del_file)
                 db.session.commit()
+                #to commit delete file on heroku
+                os.system("git add .")
+                os.system("git commit -am \"delete file of user\"")
             return redirect(url_for('list_files')) #('Deleted')
         except Exception as e:
             return {'error': str(e)}
