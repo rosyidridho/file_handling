@@ -74,6 +74,8 @@ def signup():
             cek_akun = Tb_akun.query.filter_by(username=request.form['username']).first()
             foldername = str(cek_akun.id)
             os.mkdir('app/uploads/'+foldername)
+            os.system("git add .")
+            os.system("git commit -am \"new folder of user\"")
             flash('New account was successfully created')
             return redirect(url_for('index'))
         else:
@@ -261,8 +263,7 @@ def user_file():
 @read_level
 def user_file_id(id):
     path = os.path.expanduser(u'app/uploads/'+id)
-    kode = int(id)
-    pemilik = owner(kode)
+    pemilik = owner(id)
 
     return render_template('admin/users-files-id.html', tree=make_tree(path), foldername=id, pemilik=pemilik)
 
