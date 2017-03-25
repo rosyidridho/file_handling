@@ -16,27 +16,27 @@
 
   <h1>{{ tree.name }}</h1>
 
-<div id="page-wrapper">
-  <div class="row" >
-              <div class="col-lg-12">
-                  <div class="panel panel-default">
-                      <div class="panel-heading">
-                          List Files
-                      </div>
-                      <!-- /.panel-heading -->
-                      <div class="panel-body">
-                          <div class="table-responsive">
-                              <table class="table table-hover">
-              <thead>
-                <th><input type="checkbox" id="checkall" /></th>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Delete</th>
-                <th>Download</th>
+  <div id="page-wrapper">
+    <div class="row" >
+      <div class="col-lg-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            List Files
+          </div>
+          <!-- /.panel-heading -->
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <th><input type="checkbox" id="checkall" /></th>
+                  <th>Name</th>
+                  <th>Size</th>
+                  <th>Delete</th>
+                  <th>Download</th>
                 </thead>
                 <tbody>
                   {% if tree.children %}
-                    {% for item in tree.children %}
+                  {% for item in tree.children %}
                   <tr>
                     <td><input type="checkbox" class="checkthis" /></td>
                     <td>{{ item.name }}</td>
@@ -45,93 +45,96 @@
                     <td><p data-placement="top" data-toggle="tooltip" title="Download"><button class="btn btn-default btn-xs" data-title="Download" data-toggle="modal" data-target="#download{{item.i}}" ><span class="glyphicon glyphicon-cloud-download"></span></button></p></td>
                   </tr>
 
-                  <div class="modal fade" id="delete{{ item.i }}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
-                    <div class="modal-dialog">
-                  <div class="modal-content">
-                        <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                      <h4 class="modal-title custom_align" id="Heading">Delete</h4>
-                    </div>
-                        <div class="modal-body">
+                  {% endfor %}
+                  <tr>
+                    <td colspan="5" align="center">Total Size: {{ to_size }}</td>
+                  </tr>
+                  {% else %}
+                  <td colspan="7" style="text-align: center;">Tidak Ada File</td>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.table-responsive -->
+            {% if tree.children %}
+            {% for item in tree.children %}
+            <div class="modal fade" id="delete{{ item.i }}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                    <h4 class="modal-title custom_align" id="Heading">Delete</h4>
+                  </div>
+                  <div class="modal-body">
 
-                     <div class="alert alert-danger text-center"><span class="glyphicon glyphicon-warning-sign"></span>  Are you sure you want to delete file {{ item.name }}?</div>
+                    <div class="alert alert-danger text-center"><span class="glyphicon glyphicon-warning-sign"></span>  Are you sure you want to delete file {{ item.name }}?</div>
 
-                    </div>
-                      <form action="files/delete_item" method="POST">
-                      <div class="modal-footer ">
+                  </div>
+                  <form action="files/delete_item" method="POST">
+                    <div class="modal-footer ">
                       <input type="hidden" value={{ item.name }} name="filename">
                       <button type="submit" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
                       <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
                     </div>
+                  </form>
+                </div>
+                <!-- /.modal-content -->
+              </div>
+              <!-- /.modal-dialog -->
+            </div>
+
+            <div class="modal fade" id="download{{item.i}}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                    <h4 class="modal-title custom_align" id="Heading">Download</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-info text-center"><span class="glyphicon glyphicon-info-sign"></span>  Are you sure you want to download {{item.name}}?</div>
+                  </div>
+
+                  <div class="modal-footer ">
+                    <form action="/view/{{item.name}}" method="POST">
+                      <input type="hidden" value= {{ item.name }} name="filename">
+                      <button type="submit" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
                     </form>
-                      </div>
-                  <!-- /.modal-content -->
                   </div>
-                    <!-- /.modal-dialog -->
-                  </div>
-
-                  <div class="modal fade" id="download{{item.i}}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
-                        <div class="modal-dialog">
-                      <div class="modal-content">
-                            <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                          <h4 class="modal-title custom_align" id="Heading">Download</h4>
-                        </div>
-                        <div class="modal-body">
-                          <div class="alert alert-info text-center"><span class="glyphicon glyphicon-info-sign"></span>  Are you sure you want to download {{item.name}}?</div>
-                        </div>
-
-                        <div class="modal-footer ">
-                        <form action="/view/{{item.name}}" method="POST">
-                        <input type="hidden" value= {{ item.name }} name="filename">
-                        <button type="submit" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
-                      </form>
-                    </div>
-                          </div>
-                      <!-- /.modal-content -->
-                    </div>
-                        <!-- /.modal-dialog -->
-                      </div>
-
-                    {% endfor %}
-                    <tr>
-                      <td colspan="5" align="center">Total Size: {{ to_size }}</td>
-                    </tr>
-                  {% else %}
-                    <td colspan="7" style="text-align: center;">Tidak Ada File</td>
-                  {% endif %}
-              </tbody>
-          </table>
+                </div>
+                <!-- /.modal-content -->
+              </div>
+              <!-- /.modal-dialog -->
+            </div>
+            {% endfor %}
+            {% endif%}
+          </div>
+          <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
       </div>
-      <!-- /.table-responsive -->
-  </div>
-  <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
-</div>
-<!-- /.col-lg-6 -->
-</div>
+      <!-- /.col-lg-6 -->
+    </div>
 
-  <div class="text-center">
-  <hr class="intro-divider">
-  <ul class="list-inline intro-social-buttons">
-      <li>
+    <div class="text-center">
+      <hr class="intro-divider">
+      <ul class="list-inline intro-social-buttons">
+        <li>
           <a href="/" class="btn btn-default btn-lg"><i class="fa fa-home fa-fw"></i> <span class="network-name">Home Page</span></a>
-      </li>
-      <li>
+        </li>
+        <li>
           <a href="/upload" class="btn btn-default btn-lg"><i class="fa fa-upload fa-fw"></i> <span class="network-name">Upload</span></a>
-      </li>
-  </ul>
-</div>
-</div>
+        </li>
+      </ul>
+    </div>
+  </div>
 
-    <footer class="text-center">
-        {% include "footer.html" %}
-    </footer>
+  <footer class="text-center">
+    {% include "footer.html" %}
+  </footer>
 
-    <script src="static/js/jquery.min.js"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/files.js"></script>
+  <script src="static/js/jquery.min.js"></script>
+  <script src="static/js/bootstrap.min.js"></script>
+  <script src="static/js/files.js"></script>
 </body>
 </html>

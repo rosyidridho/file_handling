@@ -1,0 +1,10 @@
+{
+  "db":{
+    "db_host":"localhost",
+    "db_username":"root",
+    "db_pass":"20022013",
+    "db_name":"db_file_handling"
+  },
+  "upload_folder":"app/uploads/",
+  "allowed_extensions":["txt", "doc", "docx", "pdf", "zip", "rar", "odt", "jpg", "JPG", "png", "PNG", "mp4", "mp3", "vlc", "MP4", "deb", "mkv", "webm", "gz"]
+}

@@ -6,10 +6,11 @@ from app import app, db
 from app.models import Tb_akun, Tb_file
 from functools import wraps
 from datetime import datetime, date
+from app.config import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.',1)[1] in app.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.',1)[1] in ALLOWED_EXTENSIONS
 
 def cek_level(id_user):
     filter_akun = Tb_akun.query.filter_by(id=id_user).first()
@@ -73,10 +74,8 @@ def signup():
             db.session.commit()
             cek_akun = Tb_akun.query.filter_by(username=request.form['username']).first()
             foldername = str(cek_akun.id)
-            os.mkdir('app/uploads/'+foldername)
-            #to commit folder in heroku
-            os.system("git add .")
-            os.system("git commit -am \"new folder of user\"")
+            path = os.path.join(UPLOAD_FOLDER, foldername)
+            os.mkdir(path)
             flash('New account was successfully created')
             return redirect(url_for('index'))
         else:
@@ -145,17 +144,16 @@ def upload_handling():
             for nm_file in cek_file:
                 if nm_file.filename == filename:
                     flash ('Nama File sudah ada')
+                    print 'Nama File sudah ada'
                     return redirect(url_for('upload'))
 
-            direktori = app.config['UPLOAD_FOLDER']+str(session['user_id'])+"/"
+            direktori = os.path.join(UPLOAD_FOLDER, str(session['user_id']))
             file.save(os.path.join(direktori, filename))
-            filesize = os.path.getsize(direktori+filename)
+            path = os.path.join(direktori, filename)
+            filesize = os.path.getsize(path)
             ins_file=Tb_file(akun_id=str(session['user_id']), filename=filename, size=str(filesize), date_create=datetime.utcnow())
             db.session.add(ins_file)
             db.session.commit()
-            #to commit file in heroku
-            os.system("git add .")
-            os.system("git commit -am \"new file of user\"")
             return redirect(url_for('list_files'))
         else:
             flash ('Ekstensi file tidak diperbolehkan')
@@ -167,7 +165,7 @@ def upload_handling():
 @read_session
 def uploaded_file(fn):
     if request.method == 'POST':
-        user_direktori = "../"+app.config['UPLOAD_FOLDER']+session['user_id']+"/"
+        user_direktori = os.path.join(UPLOAD_FOLDER, session['user_id'])
         filename = request.form['filename']
         return  send_from_directory(user_direktori, filename)
 
@@ -176,19 +174,15 @@ def uploaded_file(fn):
 @read_session
 def delete_handling():
     if request.method == 'POST':
-        user_direktori = app.config['UPLOAD_FOLDER']+session['user_id']+"/"
+        user_direktori = os.path.join(UPLOAD_FOLDER, session['user_id'])
         filename = request.form['filename']
         try:
             os.remove(os.path.join(user_direktori, filename))
             del_item = Tb_file.query.filter_by(filename=filename)
-
             for item in del_item:
                 del_file = Tb_file.query.get(item.id)
                 db.session.delete(del_file)
                 db.session.commit()
-                #to commit delete file on heroku
-                os.system("git add .")
-                os.system("git commit -am \"delete file of user\"")
             return redirect(url_for('list_files')) #('Deleted')
         except Exception as e:
             return {'error': str(e)}
@@ -197,7 +191,7 @@ def delete_handling():
 @read_session
 def list_files():
     user_direktori = str(session['user_id'])
-    path = os.path.expanduser(u'app/uploads/'+user_direktori)
+    path = os.path.expanduser(os.path.join(UPLOAD_FOLDER, user_direktori))
     allfile = Tb_file.query.filter_by(akun_id=session['user_id'])
     tot_size = 0
     for item in allfile:
@@ -261,14 +255,14 @@ def user_data():
 @read_session
 @read_level
 def user_file():
-    path = os.path.expanduser(u'app/uploads/')
+    path = os.path.expanduser(UPLOAD_FOLDER)
     return render_template('admin/users-files.html', tree=make_tree(path))
 
 @app.route('/<id>')
 @read_session
 @read_level
 def user_file_id(id):
-    path = os.path.expanduser(u'app/uploads/'+id)
+    path = os.path.expanduser(os.path.join(UPLOAD_FOLDER, id))
     pemilik = owner(id)
 
     return render_template('admin/users-files-id.html', tree=make_tree(path), foldername=id, pemilik=pemilik)
@@ -280,7 +274,7 @@ def view_admin(fn):
     if request.method == 'POST':
         foldername = request.form['foldername']
         filename = request.form['filename']
-        direktori = "../"+app.config['UPLOAD_FOLDER']+foldername+"/"
+        direktori = os.path.join(UPLOAD_FOLDER, foldername)
         return send_from_directory(direktori, filename)
 
 @app.route('/delete', methods = ['GET', 'POST'])
@@ -290,7 +284,7 @@ def delete():
     if request.method == 'POST':
         foldername = str(request.form['foldername'])
         filename = request.form['filename']
-        direktori = app.config['UPLOAD_FOLDER']+foldername+"/"
+        direktori = os.path.join(UPLOAD_FOLDER, foldername)
         try:
             os.remove(os.path.join(direktori, filename))
             return redirect(url_for('user_file_id', id=foldername)) #('Deleted')
